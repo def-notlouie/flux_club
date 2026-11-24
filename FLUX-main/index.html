@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flux — Night Experience</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0F0818;
+    --bg-elevated:#170D28;
+    --surface:#20123A;
+    --surface-hover:#2A1850;
+    --primary:#8B5CF6;
+    --primary-bright:#A78BFA;
+    --accent:#D946EF;
+    --gold:#E0B84D;
+    --text:#F3EEFB;
+    --text-muted:#AC9AC9;
+    --border:rgba(139,92,246,0.22);
+    --success:#34D399;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; scroll-behavior:smooth;}
+  body{min-height:100vh; overflow-x:hidden;}
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background:
+      radial-gradient(ellipse 700px 500px at 15% -5%, rgba(139,92,246,0.25), transparent 60%),
+      radial-gradient(ellipse 600px 500px at 100% 20%, rgba(217,70,239,0.14), transparent 60%);
+    pointer-events:none; z-index:0;
+  }
+  h1,h2,h3,.display{font-family:'Bricolage Grotesque',sans-serif;}
+
+  /* ---------- Top bar ---------- */
+  header{
+    position:sticky; top:0; z-index:40;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 5%;
+    background:rgba(15,8,24,0.78);
+    backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--border);
+  }
+  .logo{
+    font-family:'Bricolage Grotesque',sans-serif;
+    font-weight:800; font-size:1.5rem; letter-spacing:0.5px;
+    background:linear-gradient(120deg,var(--primary-bright),var(--accent));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .logo span{color:var(--text-muted); font-weight:500; font-size:0.85rem; margin-left:8px; -webkit-text-fill-color:var(--text-muted);}
+  nav.crumbs{display:flex; align-items:center; gap:10px; font-size:0.9rem; color:var(--text-muted);}
+  nav.crumbs button{
+    background:none; border:none; color:var(--text-muted); font:inherit; cursor:pointer;
+    padding:6px 10px; border-radius:8px; transition:background .15s, color .15s;
+  }
+  nav.crumbs button:hover{color:var(--text); background:var(--surface);}
+  nav.crumbs .current{color:var(--primary-bright); font-weight:600;}
+
+  main{position:relative; z-index:1; max-width:1120px; margin:0 auto; padding:0 5% 80px;}
+
+  /* ---------- Sections ---------- */
+  section{display:none; padding-top:44px; animation:fade .35s ease;}
+  section.active{display:block;}
+  @keyframes fade{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+  .hero-line{color:var(--text-muted); font-size:1.02rem; max-width:520px; margin-top:10px; line-height:1.55;}
+  .section-head h2{font-size:2.1rem; font-weight:700; letter-spacing:-0.5px;}
+
+  /* ---------- Dashboard tiles ---------- */
+  .tiles{
+    display:grid;
+    grid-template-columns:repeat(6,1fr);
+    grid-template-rows:auto auto;
+    gap:16px;
+    margin-top:36px;
+  } 
+  .tile{
+    position:relative; overflow:hidden;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:26px;
+    cursor:pointer;
+    text-align:left;
+    color:var(--text);
+    display:flex; flex-direction:column; justify-content:space-between;
+    min-height:150px;
+    transition:transform .2s ease, border-color .2s ease, background .2s ease;
+  }
+  .tile:hover{transform:translateY(-3px); border-color:var(--primary); background:var(--surface-hover);}
+  .tile:focus-visible{outline:2px solid var(--primary-bright); outline-offset:3px;}
+  .tile .icon{width:30px; height:30px; color:var(--primary-bright); margin-bottom:22px;}
+  .tile h3{font-size:1.2rem; font-weight:600;}
+  .tile p{color:var(--text-muted); font-size:0.86rem; margin-top:4px;}
+  .tile.wide{grid-column:span 3;}
+  .tile.narrow{grid-column:span 2;}
+  .tile.feature{
+    grid-column:span 6;
+    background:linear-gradient(120deg, rgba(139,92,246,0.16), rgba(217,70,239,0.10));
+    border-color:rgba(217,70,239,0.4);
+    min-height:130px; flex-direction:row; align-items:center; justify-content:space-between;
+  }
+  .tile.feature .icon{margin-bottom:0; width:34px; height:34px; color:var(--accent);}
+  .tile.feature .cta-arrow{
+    width:38px; height:38px; border-radius:50%; border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  @media(max-width:820px){
+    .tiles{grid-template-columns:repeat(2,1fr);}
+    .tile.wide,.tile.narrow{grid-column:span 1;}
+    .tile.feature{grid-column:span 2;}
+  }
+
+  /* ---------- Generic content sections ---------- */
+  .grid-cards{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:16px; margin-top:30px;}
+  .card{background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:20px;}
+  .card h4{font-size:1.05rem; font-weight:600; margin-bottom:6px;}
+  .card p{color:var(--text-muted); font-size:0.88rem; line-height:1.5;}
+  .card .price{color:var(--primary-bright); font-weight:700; font-size:1.05rem; margin-top:12px;}
+  .card .tag{display:inline-block; font-size:0.72rem; color:var(--gold); border:1px solid rgba(224,184,77,0.4); padding:2px 8px; border-radius:999px; margin-top:10px;}
+
+  .event-row{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:18px 0; border-bottom:1px solid var(--border);
+    gap:16px; flex-wrap:wrap;
+  }
+  .event-row .date-chip{
+    background:var(--bg-elevated); border:1px solid var(--border); border-radius:12px;
+    padding:8px 14px; text-align:center; min-width:64px;
+  }
+  .date-chip .d{font-family:'Bricolage Grotesque',sans-serif; font-size:1.2rem; font-weight:700; line-height:1;}
+  .date-chip .m{font-size:0.68rem; color:var(--text-muted); letter-spacing:0.06em;}
+  .event-info{flex:1; min-width:180px;}
+  .event-info h4{font-size:1.02rem; font-weight:600;}
+  .event-info p{color:var(--text-muted); font-size:0.84rem; margin-top:3px;}
+  .btn-ghost{
+    background:none; border:1px solid var(--border); color:var(--text);
+    padding:9px 16px; border-radius:10px; font:inherit; font-size:0.86rem; cursor:pointer;
+    transition:border-color .15s, color .15s;
+  }
+  .btn-ghost:hover{border-color:var(--primary-bright); color:var(--primary-bright);}
+
+  /* ---------- Table reservation / floor plan ---------- */
+  .floor-wrap{
+    margin-top:32px; background:var(--bg-elevated); border:1px solid var(--border);
+    border-radius:20px; padding:28px; position:relative;
+  }
+  .legend{display:flex; gap:22px; margin-bottom:18px; flex-wrap:wrap; font-size:0.84rem; color:var(--text-muted);}
+  .legend .dot{display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:7px;}
+  #floorSvg{width:100%; height:auto; display:block;}
+  .table-shape, .vip-shape{cursor:pointer; transition:opacity .15s;}
+  .table-shape:hover, .vip-shape:hover{opacity:0.85;}
+  .table-shape:focus-visible, .vip-shape:focus-visible{outline:2px solid var(--primary-bright);}
+
+  /* ---------- Modal ---------- */
+  .overlay{
+    position:fixed; inset:0; background:rgba(6,3,12,0.72); backdrop-filter:blur(4px);
+    display:none; align-items:flex-end; justify-content:center; z-index:100;
+  }
+  .overlay.active{display:flex;}
+  @media(min-width:640px){ .overlay{align-items:center;} }
+  .modal{
+    background:var(--bg-elevated); border:1px solid var(--border);
+    border-radius:22px 22px 0 0; width:100%; max-width:460px; max-height:88vh; overflow-y:auto;
+    padding:28px; position:relative; animation:slideUp .3s ease;
+  }
+  @media(min-width:640px){ .modal{border-radius:22px;} }
+  @keyframes slideUp{from{transform:translateY(30px); opacity:0;} to{transform:translateY(0); opacity:1;}}
+  .modal-close{
+    position:absolute; top:20px; right:20px; background:var(--surface); border:1px solid var(--border);
+    width:32px; height:32px; border-radius:50%; color:var(--text-muted); cursor:pointer;
+    display:flex; align-items:center; justify-content:center; font-size:1rem;
+  }
+  .modal-close:hover{color:var(--text);}
+  .modal-kicker{color:var(--primary-bright); font-size:0.82rem; font-weight:600; margin-bottom:4px;}
+  .modal h3{font-size:1.4rem; font-weight:700;}
+  .modal .cap{color:var(--text-muted); font-size:0.86rem; margin-top:4px;}
+  .fee-box{
+    display:flex; justify-content:space-between; align-items:center;
+    background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    padding:16px 18px; margin:20px 0;
+  }
+  .fee-box .label{font-size:0.82rem; color:var(--text-muted);}
+  .fee-box .amount{font-family:'Bricolage Grotesque',sans-serif; font-size:1.5rem; font-weight:700; color:var(--gold);}
+  .field{margin-bottom:14px;}
+  .field label{display:block; font-size:0.82rem; color:var(--text-muted); margin-bottom:6px;}
+  .field input{
+    width:100%; background:var(--surface); border:1px solid var(--border); color:var(--text);
+    padding:11px 13px; border-radius:10px; font:inherit; font-size:0.92rem;
+  }
+  .field input:focus{outline:none; border-color:var(--primary-bright);}
+  .field-row{display:flex; gap:10px;}
+  .field-row .field{flex:1;}
+  .pay-methods{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:16px 0 22px;}
+  .pay-opt{
+    border:1px solid var(--border); background:var(--surface); border-radius:12px;
+    padding:12px 14px; cursor:pointer; font-size:0.86rem; display:flex; align-items:center; gap:9px;
+  }
+  .pay-opt input{accent-color:var(--primary);}
+  .pay-opt.selected{border-color:var(--primary-bright); background:rgba(139,92,246,0.12);}
+  .confirm-btn{
+    width:100%; padding:14px; border:none; border-radius:12px; font:inherit; font-weight:600; font-size:0.96rem;
+    background:linear-gradient(120deg,var(--primary),var(--accent)); color:#fff; cursor:pointer;
+    transition:filter .15s;
+  }
+  .confirm-btn:hover{filter:brightness(1.08);}
+  .success-view{text-align:center; padding:20px 4px 6px;}
+  .success-view .check{
+    width:56px; height:56px; border-radius:50%; background:rgba(52,211,153,0.15);
+    display:flex; align-items:center; justify-content:center; margin:0 auto 18px; color:var(--success);
+  }
+  .success-view h3{margin-bottom:8px;}
+  .success-view p{color:var(--text-muted); font-size:0.9rem; line-height:1.5;}
+  .success-view .ref{
+    margin-top:18px; background:var(--surface); border:1px dashed var(--border); border-radius:12px;
+    padding:12px; font-family:monospace; font-size:0.85rem; color:var(--primary-bright);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">FLUX<span>night experience</span></div>
+  <nav class="crumbs">
+    <button onclick="showSection('dashboard')" id="crumb-dashboard">Dashboard</button>
+    <span id="crumb-sep" style="display:none;">/</span>
+    <button class="current" id="crumb-current" style="display:none;"></button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- DASHBOARD -->
+  <section id="dashboard" class="active">
+    <div class="section-head">
+      <h2>Good evening sa imong tanan mga party peeps.</h2>
+      <p class="hero-line">Everything for tonight's party — the menu, what's running, who's playing, what's coming up, and where people are sitting.</p>
+    </div>
+
+    <div class="tiles">
+      <button class="tile feature" onclick="showSection('reservation')">
+        <div>
+          <h3>Table reservation</h3>
+          <p>View the floor, pick a table or VIP couch, lock it in.</p>
+        </div>
+        <span class="cta-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></span>
+      </button>
+
+      <button class="tile wide" onclick="showSection('menu')">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+        <div><h3>Menu</h3><p>Drinks, bottles, coke saka droga</p></div>
+      </button>
+
+      <button class="tile wide" onclick="showSection('promo')">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 12l-8 8-8-8 8-8z"/><circle cx="12" cy="12" r="2"/></svg>
+        <div><h3>Promo</h3><p>Tonight's offers and bundles</p></div>
+      </button>
+
+      <button class="tile narrow" onclick="showSection('performers')">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        <div><h3>Performers</h3><p>Who's on the decks</p></div>
+      </button>
+
+      <button class="tile narrow" onclick="showSection('events')">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+        <div><h3>Events</h3><p>This week's lineup</p></div>
+      </button>
+
+      <button class="tile narrow" onclick="showSection('reservation')">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        <div><h3>Floor plan</h3><p>See who's seated</p></div>
+      </button>
+
+<button class="tile narrow" onclick="window.location.href='admin.html'">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+        <circle cx="12" cy="8" r="4"/>
+        <path d="M5 21v-2a7 7 0 0 1 14 0v2"/>
+        <path d="M19 8h3M20.5 6.5v3"/>
+    </svg>
+    <div>
+        <h3>Admin Dashboard</h3>
+        <p>Manage FLUX database records</p>
+    </div>
+</button>
+
+    </div>
+  </section>
+
+  <!-- MENU -->
+  <section id="menu">
+    <div class="section-head"><h2>Menu</h2><p class="hero-line">Signature pours and small plates, available at every table here at flux by louieboy.</p></div>
+    <div class="grid-cards" id="menuList"></div>
+      <div class="card"><h4>A3</h4><p>Alfonso, Coke, cocktail tower, grand platter</p><div class="price">₱420</div></div>
+      <div class="card"><h4>Flux Old Fashioned</h4><p>Bourbon, smoked sugar, bitters</p><div class="price">₱480</div></div>
+      <div class="card"><h4>Fiesta Platter</h4><p>isaw, mojos, lechon, potato fries</p><div class="price">₱400</div></div>
+      <div class="card"><h4>Sizzling Sisig</h4><p>1 plate serving of sisig with egg</p><div class="price">₱6,800</div><span class="tag">bottle service</span></div>
+      <div class="card"><h4>A1</h4><p>Alfonso, Coke, sisig, fries</p><div class="price">₱320</div></div>
+      <div class="card"><h4>A2</h4><p>Alfonso, Coke, sisig, lumpia, platter</p><div class="price">₱650</div></div>
+    </div>
+  </section>
+
+  <!-- PROMO -->
+  <section id="promo">
+    <div class="section-head"><h2>Promo</h2><p class="hero-line">What's running tonight — ask staff to apply at your table.</p></div>
+    <div class="grid-cards">
+      <div class="card"><h4>VIPs PPromo</h4><p>3000 consumables</p><span class="tag">tonight only</span></div>
+      <div class="card"><h4>A1</h4><p>Liquor and platters package save up to ₱500 off/p><span class="tag">VIP</span></div>
+      <div class="card"><h4>B1</h4><p>Liquor and platters package save up to ₱500 off</p></div>
+      <div class="card"><h4>B2</h4><p>Liquor and platters package save up to ₱500 off</p><span class="tag">table only</span></div>
+    </div>
+  </section>
+
+  <!-- PERFORMERS -->
+  <section id="performers">
+    <div class="section-head"><h2>Performers</h2><p class="hero-line">Tonight's lineup on the main floor.</p></div>
+    <div class="grid-cards">
+      <div class="card"><h4>DJ ewol</h4><p>y2k, r&b, opening set · 8:00pm</p></div>
+      <div class="card"><h4>DJ abueg</h4><p>edm, techno, primetime · 10:30pm</p></div>
+      <div class="card"><h4>DJ roydel</h4><p>Afrobeat / amapiano · 12:00am</p></div>
+      <div class="card"><h4>MC/DJ erik wright</h4><p>Closing techno set · 3:00am</p></div>
+    </div>
+  </section>
+
+  <!-- EVENTS -->
+  <section id="events">
+    <div class="section-head"><h2>Events</h2><p class="hero-line">Coming up this ber months mga PU TANG INA NYOO.</p></div>
+    <div style="margin-top:20px;">
+      <div class="event-row">
+        <div class="date-chip"><div class="d">19</div><div class="m">SEP</div></div>
+        <div class="event-info"><h4>Zeus birthday bash</h4><p>Doors 8pm · main floor + VIP couches</p></div>
+        <button class="btn-ghost" onclick="showSection('reservation')">Reserve</button>
+      </div>
+      <div class="event-row">
+        <div class="date-chip"><div class="d">20</div><div class="m">SEP</div></div>
+        <div class="event-info"><h4>DJ Roy's birthday bash</h4><p>afterglow saturday essential</p></div>
+        <button class="btn-ghost" onclick="showSection('reservation')">Reserve</button>
+      </div>
+      <div class="event-row">
+        <div class="date-chip"><div class="d">9</div><div class="m">OCT</div></div>
+        <div class="event-info"><h4>DJ ewol's Birthday Bash</h4><p>Full lineup, limited VIP couches</p></div>
+        <button class="btn-ghost" onclick="showSection('reservation')">Reserve</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- TABLE RESERVATION -->
+  <section id="reservation">
+    <div class="section-head"><h2>Table reservation</h2><p class="hero-line">Tap a table or VIP couch to see pricing and book it.</p></div>
+
+    <div class="floor-wrap">
+      <div class="legend">
+        <span><span class="dot" style="background:#8B5CF6;"></span>Standard table</span>
+        <span><span class="dot" style="background:#E0B84D;"></span>VIP couch</span>
+        <span><span class="dot" style="background:#3A2A5C;"></span>Dance floor</span>
+      </div>
+
+      <svg id="floorSvg" viewBox="0 0 800 460" xmlns="http://www.w3.org/2000/svg">
+        <!-- stage -->
+        <rect x="300" y="14" width="200" height="34" rx="8" fill="#1A0F2E" stroke="#8B5CF622"/>
+        <text x="400" y="36" text-anchor="middle" fill="#AC9AC9" font-size="13" font-family="Inter">DJ booth</text>
+
+        <!-- dance floor -->
+        <rect x="230" y="70" width="340" height="120" rx="16" fill="#180D2C" stroke="#8B5CF633" stroke-dasharray="5 6"/>
+        <text x="400" y="134" text-anchor="middle" fill="#6E5C93" font-size="13" font-family="Inter">Dance floor</text>
+
+        <!-- VIP couch left -->
+        <g class="vip-shape" tabindex="0" role="button" aria-label="VIP couch, left side" onclick="openTable('vip-left')" onkeypress="if(event.key==='Enter')openTable('vip-left')">
+          <rect x="34" y="210" width="120" height="215" rx="34" fill="#3A2A18" stroke="#E0B84D" stroke-width="1.5"/>
+          <rect x="50" y="228" width="88" height="34" rx="14" fill="#E0B84D33"/>
+          <rect x="50" y="270" width="88" height="34" rx="14" fill="#E0B84D33"/>
+          <rect x="50" y="312" width="88" height="34" rx="14" fill="#E0B84D33"/>
+          <text x="94" y="400" text-anchor="middle" fill="#E0B84D" font-size="13" font-weight="600" font-family="Inter">VIP · West</text>
+        </g>
+
+        <!-- VIP couch right -->
+        <g class="vip-shape" tabindex="0" role="button" aria-label="VIP couch, right side" onclick="openTable('vip-right')" onkeypress="if(event.key==='Enter')openTable('vip-right')">
+          <rect x="646" y="210" width="120" height="215" rx="34" fill="#3A2A18" stroke="#E0B84D" stroke-width="1.5"/>
+          <rect x="662" y="228" width="88" height="34" rx="14" fill="#E0B84D33"/>
+          <rect x="662" y="270" width="88" height="34" rx="14" fill="#E0B84D33"/>
+          <rect x="662" y="312" width="88" height="34" rx="14" fill="#E0B84D33"/>
+          <text x="706" y="400" text-anchor="middle" fill="#E0B84D" font-size="13" font-weight="600" font-family="Inter">VIP · East</text>
+        </g>
+
+        <!-- Table 1 -->
+        <g class="table-shape" tabindex="0" role="button" aria-label="Table 1" onclick="openTable('t1')" onkeypress="if(event.key==='Enter')openTable('t1')">
+          <circle cx="290" cy="255" r="46" fill="#20123A" stroke="#8B5CF6" stroke-width="1.5"/>
+          <circle cx="290" cy="255" r="30" fill="#8B5CF61f"/>
+          <text x="290" y="261" text-anchor="middle" fill="#F3EEFB" font-size="15" font-weight="600" font-family="Inter">T1</text>
+        </g>
+
+        <!-- Table 2 -->
+        <g class="table-shape" tabindex="0" role="button" aria-label="Table 2" onclick="openTable('t2')" onkeypress="if(event.key==='Enter')openTable('t2')">
+          <circle cx="510" cy="255" r="46" fill="#20123A" stroke="#8B5CF6" stroke-width="1.5"/>
+          <circle cx="510" cy="255" r="30" fill="#8B5CF61f"/>
+          <text x="510" y="261" text-anchor="middle" fill="#F3EEFB" font-size="15" font-weight="600" font-family="Inter">T2</text>
+        </g>
+
+        <!-- Table 3 -->
+        <g class="table-shape" tabindex="0" role="button" aria-label="Table 3" onclick="openTable('t3')" onkeypress="if(event.key==='Enter')openTable('t3')">
+          <circle cx="290" cy="360" r="46" fill="#20123A" stroke="#8B5CF6" stroke-width="1.5"/>
+          <circle cx="290" cy="360" r="30" fill="#8B5CF61f"/>
+          <text x="290" y="366" text-anchor="middle" fill="#F3EEFB" font-size="15" font-weight="600" font-family="Inter">T3</text>
+        </g>
+
+        <!-- Table 4 -->
+        <g class="table-shape" tabindex="0" role="button" aria-label="Table 4" onclick="openTable('t4')" onkeypress="if(event.key==='Enter')openTable('t4')">
+          <circle cx="510" cy="360" r="46" fill="#20123A" stroke="#8B5CF6" stroke-width="1.5"/>
+          <circle cx="510" cy="360" r="30" fill="#8B5CF61f"/>
+          <text x="510" y="366" text-anchor="middle" fill="#F3EEFB" font-size="15" font-weight="600" font-family="Inter">T4</text>
+        </g>
+
+        <!-- entrance -->
+        <text x="400" y="448" text-anchor="middle" fill="#6E5C93" font-size="12" font-family="Inter">entrance</text>
+      </svg>
+    </div>
+  </section>
+
+</main>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay">
+  <div class="modal" id="modalBody"></div>
+</div>
+
+<script>
+  const tables = {
+    't1': {name:'Table 1', kind:'Standard table', capacity:'Up to 4 guests', fee:2000, note:'Minimum consumable, applied to your bar tab.'},
+    't2': {name:'Table 2', kind:'Standard table', capacity:'Up to 4 guests', fee:2000, note:'Minimum consumable, applied to your bar tab.'},
+    't3': {name:'Table 3', kind:'Standard table', capacity:'Up to 4 guests', fee:2000, note:'Minimum consumable, applied to your bar tab.'},
+    't4': {name:'Table 4', kind:'Standard table', capacity:'Up to 6 guests, closest to the floor', fee:2500, note:'Minimum consumable, applied to your bar tab.'},
+    'vip-left': {name:'VIP Couch 2', kind:'VIP couch', capacity:'Up to 8 guests', fee:5000, note:'Includes one bottle of house spirit and dedicated host.'},
+    'vip-right': {name:'VIP Couch 1', kind:'VIP couch', capacity:'Up to 8 guests', fee:5000, note:'Includes one bottle of house spirit and dedicated host.'},
+  };
+
+  const sectionLabels = {
+    dashboard:'Dashboard', menu:'Menu', promo:'Promo', performers:'Performers',
+    events:'Events', reservation:'Table reservation'
+  };
+
+  function showSection(id){
+    document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    const sep = document.getElementById('crumb-sep');
+    const cur = document.getElementById('crumb-current');
+    if(id === 'dashboard'){
+      sep.style.display = 'none';
+      cur.style.display = 'none';
+    } else {
+      sep.style.display = 'inline';
+      cur.style.display = 'inline';
+      cur.textContent = sectionLabels[id];
+    }
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  function openTable(id){
+    const t = tables[id];
+    const overlay = document.getElementById('overlay');
+    const modal = document.getElementById('modalBody');
+    modal.innerHTML = `
+      <button class="modal-close" onclick="closeModal()" aria-label="Close">✕</button>
+      <div class="modal-kicker">${t.kind}</div>
+      <h3>${t.name}</h3>
+      <p class="cap">${t.capacity}</p>
+
+      <div class="fee-box">
+        <div>
+          <div class="label">Reservation fee</div>
+          <div style="font-size:0.78rem; color:var(--text-muted); margin-top:2px; max-width:220px;">${t.note}</div>
+        </div>
+        <div class="amount">₱${t.fee.toLocaleString()}</div>
+      </div>
+
+      <form id="resForm" onsubmit="return confirmBooking(event, '${id}')">
+        <div class="field-row">
+          <div class="field"><label for="fname">Name</label><input id="fname" type="text" placeholder="Juan Dela Cruz" required></div>
+          <div class="field"><label for="fguests">Guests</label><input id="fguests" type="number" min="1" max="12" placeholder="4" required></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label for="fdate">Date</label><input id="fdate" type="date" required></div>
+          <div class="field"><label for="ftime">Time</label><input id="ftime" type="time" required></div>
+        </div>
+
+        <label style="display:block; font-size:0.82rem; color:var(--text-muted); margin:18px 0 4px;">Payment method</label>
+        <div class="pay-methods" id="payMethods">
+          ${payOption('gcash','GCash')}
+          ${payOption('card','Card')}
+          ${payOption('bank','Bank transfer')}
+          ${payOption('cash','Cash at venue')}
+        </div>
+
+        <button type="submit" class="confirm-btn">Confirm reservation — ₱${t.fee.toLocaleString()}</button>
+      </form>
+    `;
+    overlay.classList.add('active');
+    wirePayOptions();
+  }
+
+  function payOption(value, label){
+    return `<label class="pay-opt" data-value="${value}">
+      <input type="radio" name="pay" value="${value}" ${value==='gcash' ? 'checked' : ''}>
+      ${label}
+    </label>`;
+  }
+
+  function wirePayOptions(){
+    const opts = document.querySelectorAll('.pay-opt');
+    const mark = () => opts.forEach(o => o.classList.toggle('selected', o.querySelector('input').checked));
+    opts.forEach(o => o.querySelector('input').addEventListener('change', mark));
+    mark();
+  }
+
+  
+    
+async function confirmBooking(e, id) {
+    e.preventDefault();
+
+    const t = tables[id];
+
+    const name = document.getElementById('fname').value.trim();
+    const date = document.getElementById('fdate').value;
+    const time = document.getElementById('ftime').value;
+    const guests = document.getElementById('fguests').value;
+
+    const selectedPayment = document.querySelector('input[name="pay"]:checked');
+
+    if (!name || !date || !time || !guests || !selectedPayment) {
+        alert("Please complete all reservation details.");
+        return false;
+    }
+
+    const pay = selectedPayment.closest('.pay-opt').textContent.trim();
+
+    const tableCodes = {
+        "t1": "T1",
+        "t2": "T2",
+        "t3": "T3",
+        "t4": "T4",
+        "vip-left": "VIP-West",
+        "vip-right": "VIP-East"
+    };
+
+    const reservationData = {
+        customerName: name,
+        guestCount: Number(guests),
+        tableCode: tableCodes[id],
+        tableType: t.kind,
+        reservationDate: date,
+        reservationTime: time,
+        reservationFee: t.fee,
+        paymentMethod: pay
+    };
+
+    try {
+        const response = await fetch("/api/reservations", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(reservationData)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.message || result.error || "Reservation failed.");
+        }
+
+        const ref = result.reservation.ReferenceNo;
+
+        document.getElementById('modalBody').innerHTML = `
+            <button class="modal-close" onclick="closeModal()" aria-label="Close">✕</button>
+            <div class="success-view">
+                <div class="check">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                        <path d="M20 6L9 17l-5-5"/>
+                    </svg>
+                </div>
+                <h3>${t.name} is reserved</h3>
+                <p>${escapeHTML(name)}, we've held this ${escapeHTML(t.kind)} for ${escapeHTML(date)} at ${escapeHTML(time)}. Pay the ₱${Number(t.fee).toLocaleString()} reservation fee via ${escapeHTML(pay)} to lock it in — staff will follow up to confirm.</p>
+                <div class="ref">Reference ${escapeHTML(ref)}</div>
+                <button class="confirm-btn" style="margin-top:22px;" onclick="closeModal()">Done</button>
+            </div>
+        `;
+
+    } catch (error) {
+        console.error("Reservation error:", error);
+        alert("Unable to save reservation: " + error.message);
+    }
+
+    return false;
+}
+
+  function closeModal(){
+    document.getElementById('overlay').classList.remove('active');
+  }
+  document.getElementById('overlay').addEventListener('click', (e) => {
+    if(e.target.id === 'overlay') closeModal();
+  });
+
+  async function loadMenu() {
+    const menuList = document.getElementById("menuList");
+
+    try {
+        const response = await fetch("/api/menu");
+
+        if (!response.ok) {
+            throw new Error("Unable to load menu.");
+        }
+
+        const menuItems = await response.json();
+
+        menuList.innerHTML = menuItems.map(item => `
+            <div class="card">
+                <h4>${escapeHTML(item.ItemName)}</h4>
+                <p>${escapeHTML(item.Description || "")}</p>
+                <div class="price">
+                    ₱${Number(item.Price).toLocaleString("en-PH")}
+                </div>
+                <span class="tag">${escapeHTML(item.Category || "")}</span>
+            </div>
+        `).join("");
+
+    } catch (error) {
+        console.error("Menu loading error:", error);
+        menuList.innerHTML = `
+            <p>Unable to load menu. Please try again.</p>
+        `;
+    }
+}
+
+function escapeHTML(value) {
+    return String(value).replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+    })[char]);
+}
+
+loadMenu();
+</script>
+</body>
+</html>

@@ -1,0 +1,1120 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FLUX | Admin Dashboard</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #0d0815;
+    color: #f5efff;
+}
+
+.layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 245px;
+    background: #170e25;
+    border-right: 1px solid #352044;
+    padding: 28px 18px;
+    flex-shrink: 0;
+}
+
+.logo {
+    color: #c084fc;
+    font-size: 29px;
+    font-weight: bold;
+    letter-spacing: 4px;
+    margin: 0 12px 8px;
+}
+
+.subtitle {
+    color: #9b8aaa;
+    font-size: 12px;
+    margin: 0 12px 38px;
+}
+
+.nav-label {
+    color: #806b91;
+    font-size: 11px;
+    letter-spacing: 2px;
+    margin: 20px 12px 12px;
+}
+
+.nav-btn {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 9px;
+    background: transparent;
+    color: #b9a9c9;
+    text-align: left;
+    font-size: 14px;
+    cursor: pointer;
+    margin-bottom: 7px;
+}
+
+.nav-btn:hover,
+.nav-btn.active {
+    background: #39234f;
+    color: #d8b4fe;
+}
+
+.sidebar-bottom {
+    margin-top: 45px;
+    border-top: 1px solid #352044;
+    padding-top: 20px;
+}
+
+.sidebar a {
+    display: block;
+    color: #c4a5fd;
+    text-decoration: none;
+    font-size: 13px;
+    padding: 12px;
+}
+
+.main {
+    flex: 1;
+    padding: 35px;
+    min-width: 0;
+}
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 38px;
+}
+
+.topbar h1 {
+    font-size: 27px;
+}
+
+.topbar p {
+    color: #9b8aaa;
+    margin-top: 8px;
+    font-size: 13px;
+}
+
+.admin-tag {
+    background: #29183a;
+    border: 1px solid #69438c;
+    color: #d8b4fe;
+    padding: 10px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+}
+
+.section {
+    display: none;
+}
+
+.section.active {
+    display: block;
+}
+
+.section-heading {
+    margin-bottom: 22px;
+}
+
+.section-heading h2 {
+    font-size: 22px;
+    margin-bottom: 8px;
+}
+
+.section-heading p {
+    color: #9b8aaa;
+    font-size: 13px;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 35px;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, #21142f, #171020);
+    border: 1px solid #3a2850;
+    border-radius: 14px;
+    padding: 23px;
+}
+
+.stat-icon {
+    font-size: 24px;
+    margin-bottom: 18px;
+}
+
+.stat-card p {
+    color: #a997b8;
+    font-size: 13px;
+}
+
+.stat-card h2 {
+    font-size: 32px;
+    margin-top: 9px;
+    color: #e9d5ff;
+}
+
+.panel {
+    background: #170e25;
+    border: 1px solid #352044;
+    border-radius: 14px;
+    padding: 22px;
+    margin-bottom: 25px;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.panel-header h3 {
+    font-size: 17px;
+}
+
+button.action {
+    background: #39234f;
+    color: #e9d5ff;
+    border: 1px solid #69438c;
+    padding: 9px 14px;
+    border-radius: 7px;
+    cursor: pointer;
+    margin: 2px;
+}
+
+button.action:hover {
+    background: #69438c;
+}
+
+button.delete {
+    background: #47252e;
+    border-color: #914453;
+    color: #ffb4bd;
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 650px;
+}
+
+th {
+    color: #a88cbd;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-align: left;
+    padding: 14px 12px;
+    border-bottom: 1px solid #39264b;
+}
+
+td {
+    padding: 15px 12px;
+    border-bottom: 1px solid #2b1d39;
+    font-size: 13px;
+    color: #e3d8ed;
+}
+
+.status {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 20px;
+    background: #263d32;
+    color: #8ce5b4;
+    font-size: 11px;
+}
+
+.status.pending {
+    background: #49351f;
+    color: #ffd38a;
+}
+
+.status.cancelled,
+.status.inactive,
+.status.unavailable {
+    background: #47252e;
+    color: #ff9ca8;
+}
+
+.empty {
+    color: #9b8aaa;
+    text-align: center;
+    padding: 25px;
+}
+
+.error {
+    color: #ff9ca8;
+    padding: 15px;
+}
+
+/* POPUP FORM */
+
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.78);
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+}
+
+.modal.show {
+    display: flex;
+}
+
+.modal-box {
+    width: 100%;
+    max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
+    background: #1b1028;
+    border: 1px solid #69438c;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 15px 50px rgba(0,0,0,.5);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+}
+
+.modal-header h2 {
+    color: #e9d5ff;
+    font-size: 21px;
+}
+
+.close-btn {
+    background: transparent;
+    border: none;
+    color: #c4a5fd;
+    font-size: 25px;
+    cursor: pointer;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    color: #c4b5d0;
+    font-size: 13px;
+    margin-bottom: 8px;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 12px;
+    background: #100a19;
+    color: white;
+    border: 1px solid #503567;
+    border-radius: 7px;
+    outline: none;
+    font-family: Arial, sans-serif;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    border-color: #c084fc;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 75px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 22px;
+}
+
+.modal-actions button {
+    padding: 11px 17px;
+}
+
+.cancel-btn {
+    background: #30223d;
+    color: #ddd;
+    border: 1px solid #59436c;
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+.save-btn {
+    background: #8b5cf6;
+    color: white;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+.save-btn:disabled {
+    opacity: .6;
+    cursor: wait;
+}
+
+@media(max-width:800px) {
+    .layout {
+        display: block;
+    }
+
+    .sidebar {
+        width: 100%;
+    }
+
+    .main {
+        padding: 22px 15px;
+    }
+
+    .stats {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="layout">
+
+<aside class="sidebar">
+    <div class="logo">FLUX</div>
+    <div class="subtitle">NIGHT EXPERIENCE</div>
+
+    <div class="nav-label">MAIN MENU</div>
+
+    <nav>
+        <button class="nav-btn active" data-section="dashboard">▦ Dashboard</button>
+        <button class="nav-btn" data-section="menu">♧ Menu Management</button>
+        <button class="nav-btn" data-section="employees">♙ Employees</button>
+        <button class="nav-btn" data-section="reservations">▣ Reservations</button>
+    </nav>
+
+    <div class="sidebar-bottom">
+        <a href="index.html">← Back to FLUX Website</a>
+    </div>
+</aside>
+
+<main class="main">
+
+<header class="topbar">
+    <div>
+        <h1 id="pageTitle">Dashboard</h1>
+        <p>Welcome to your FLUX administration panel.</p>
+    </div>
+    <div class="admin-tag">● ADMIN PANEL</div>
+</header>
+
+<section class="section active" id="dashboard">
+
+    <div class="section-heading">
+        <h2>Overview</h2>
+        <p>Summary of your FLUX database records.</p>
+    </div>
+
+    <div class="stats">
+        <div class="stat-card">
+            <div class="stat-icon">🍸</div>
+            <p>Total Menu Items</p>
+            <h2 id="menuCount">-</h2>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <p>Total Employees</p>
+            <h2 id="employeeCount">-</h2>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">📅</div>
+            <p>Total Reservations</p>
+            <h2 id="reservationCount">-</h2>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="panel-header">
+            <h3>Recent Reservations</h3>
+            <button class="action" data-section="reservations">View All</button>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>REFERENCE</th>
+                        <th>CUSTOMER</th>
+                        <th>TABLE</th>
+                        <th>DATE</th>
+                        <th>STATUS</th>
+                    </tr>
+                </thead>
+                <tbody id="recentReservations">
+                    <tr><td colspan="5" class="empty">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<section class="section" id="menu">
+    <div class="section-heading">
+        <h2>Menu Management</h2>
+        <p>Manage menu items stored in FLUX_DB.</p>
+    </div>
+
+    <div class="panel">
+        <div class="panel-header">
+            <h3>All Menu Items</h3>
+            <div>
+                <button class="action" id="addMenuBtn">+ Add Item</button>
+                <button class="action" id="refreshMenuBtn">↻ Refresh</button>
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>ITEM NAME</th>
+                        <th>DESCRIPTION</th>
+                        <th>CATEGORY</th>
+                        <th>PRICE</th>
+                        <th>AVAILABILITY</th>
+                        <th>ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody id="menuTable">
+                    <tr><td colspan="7" class="empty">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<section class="section" id="employees">
+    <div class="section-heading">
+        <h2>Employee Management</h2>
+        <p>Manage FLUX employee records.</p>
+    </div>
+
+    <div class="panel">
+        <div class="panel-header">
+            <h3>Employee Records</h3>
+            <div>
+                <button class="action" id="addEmployeeBtn">+ Add Employee</button>
+                <button class="action" id="refreshEmployeeBtn">↻ Refresh</button>
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>EMPLOYEE NAME</th>
+                        <th>POSITION</th>
+                        <th>CONTACT</th>
+                        <th>EMAIL</th>
+                        <th>STATUS</th>
+                        <th>ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody id="employeeTable">
+                    <tr><td colspan="7" class="empty">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<section class="section" id="reservations">
+    <div class="section-heading">
+        <h2>Reservation Management</h2>
+        <p>View and manage customer reservations.</p>
+    </div>
+
+    <div class="panel">
+        <div class="panel-header">
+            <h3>All Reservations</h3>
+            <button class="action" id="refreshReservationBtn">↻ Refresh</button>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>REFERENCE</th>
+                        <th>CUSTOMER</th>
+                        <th>GUESTS</th>
+                        <th>TABLE</th>
+                        <th>DATE</th>
+                        <th>TIME</th>
+                        <th>FEE</th>
+                        <th>PAYMENT</th>
+                        <th>STATUS</th>
+                    </tr>
+                </thead>
+                <tbody id="reservationTable">
+                    <tr><td colspan="9" class="empty">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+</main>
+</div>
+
+<!-- REUSABLE POPUP -->
+<div class="modal" id="adminModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2 id="modalTitle">Form</h2>
+            <button class="close-btn" type="button" id="closeModalBtn">×</button>
+        </div>
+        <form id="modalForm">
+            <div id="modalFields"></div>
+            <div class="modal-actions" id="modalActions">
+                <button type="button" class="cancel-btn" id="cancelModalBtn">Cancel</button>
+                <button type="submit" class="save-btn" id="saveModalBtn">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+"use strict";
+
+// GENERAL HELPERS
+
+function escapeHTML(value) {
+    return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+    })[char]);
+}
+
+function statusBadge(value) {
+    const status = String(value || "Unknown");
+    const lower = status.toLowerCase();
+
+    let className = "";
+
+    if (lower === "pending") className = "pending";
+    if (lower === "cancelled") className = "cancelled";
+    if (lower === "inactive") className = "inactive";
+    if (lower === "unavailable") className = "unavailable";
+
+    return `<span class="status ${className}">${escapeHTML(status)}</span>`;
+}
+
+function formatDate(value) {
+    if (!value) return "-";
+
+    const date = new Date(value);
+
+    if (isNaN(date.getTime())) return escapeHTML(value);
+
+    return date.toLocaleDateString("en-PH", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        timeZone: "UTC"
+    });
+}
+
+function formatTime(value) {
+    if (!value) return "-";
+
+    const match = String(value).match(/T(\d{2}:\d{2})/);
+
+    return match ? match[1] : String(value).slice(0, 5);
+}
+
+async function getData(endpoint) {
+    const response = await fetch(endpoint);
+
+    if (!response.ok) {
+        throw new Error("Unable to load " + endpoint);
+    }
+
+    return response.json();
+}
+
+async function saveAdminData(url, method, data, refreshFunction) {
+    try {
+        const response = await fetch(url, {
+            method,
+            headers: {
+                "Content-Type": "application/json"
+            },
+            ...(data ? { body: JSON.stringify(data) } : {})
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.message || result.error || "Request failed.");
+        }
+
+        closeModal();
+        alert(result.message || "Operation completed successfully!");
+
+        await refreshFunction();
+        await loadDashboard();
+
+    } catch (error) {
+        console.error(error);
+        alert("Error: " + error.message);
+    }
+}
+
+function showError(elementId, columns, error) {
+    document.getElementById(elementId).innerHTML =
+        `<tr><td colspan="${columns}" class="error">${escapeHTML(error.message)}</td></tr>`;
+}
+
+// POPUP SYSTEM
+
+const modal = document.getElementById("adminModal");
+const modalForm = document.getElementById("modalForm");
+const modalTitle = document.getElementById("modalTitle");
+const modalFields = document.getElementById("modalFields");
+const modalActions = document.getElementById("modalActions");
+const saveModalBtn = document.getElementById("saveModalBtn");
+
+let modalSubmitAction = null;
+
+function openModal(title, fields, submitAction, buttonText = "Save") {
+    modalTitle.textContent = title;
+    modalFields.innerHTML = fields;
+    modalSubmitAction = submitAction;
+
+    modalActions.style.display = "flex";
+    saveModalBtn.style.display = "inline-block";
+    saveModalBtn.textContent = buttonText;
+
+    modal.classList.add("show");
+}
+
+function closeModal() {
+    modal.classList.remove("show");
+    modalForm.reset();
+    modalFields.innerHTML = "";
+    modalSubmitAction = null;
+}
+
+document.getElementById("closeModalBtn").addEventListener("click", closeModal);
+document.getElementById("cancelModalBtn").addEventListener("click", closeModal);
+
+modal.addEventListener("click", function(event) {
+    if (event.target === modal) closeModal();
+});
+
+modalForm.addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    if (!modalSubmitAction) return;
+
+    saveModalBtn.disabled = true;
+    saveModalBtn.textContent = "Saving...";
+
+    try {
+        await modalSubmitAction(new FormData(modalForm));
+    } finally {
+        saveModalBtn.disabled = false;
+        saveModalBtn.textContent = "Save";
+    }
+});
+
+function field(label, name, value = "", type = "text", required = true) {
+    return `
+        <div class="form-group">
+            <label for="${name}">${label}</label>
+            <input
+                id="${name}"
+                name="${name}"
+                type="${type}"
+                value="${escapeHTML(value)}"
+                ${required ? "required" : ""}
+                ${type === "number" ? 'min="0" step="0.01"' : ""}
+            >
+        </div>
+    `;
+}
+
+function textAreaField(label, name, value = "") {
+    return `
+        <div class="form-group">
+            <label for="${name}">${label}</label>
+            <textarea id="${name}" name="${name}">${escapeHTML(value)}</textarea>
+        </div>
+    `;
+}
+
+function selectField(label, name, value, options) {
+    return `
+        <div class="form-group">
+            <label for="${name}">${label}</label>
+            <select id="${name}" name="${name}" required>
+                ${options.map(option => `
+                    <option value="${option}" ${option === value ? "selected" : ""}>
+                        ${option}
+                    </option>
+                `).join("")}
+            </select>
+        </div>
+    `;
+}
+
+function showDeleteConfirmation(message, deleteAction) {
+    modalTitle.textContent = "Confirm Delete";
+
+    modalFields.innerHTML = `
+        <p style="color:#c4b5d0;line-height:1.6">${escapeHTML(message)}</p>
+    `;
+
+    modalActions.style.display = "flex";
+    saveModalBtn.style.display = "inline-block";
+    saveModalBtn.textContent = "Delete";
+    saveModalBtn.classList.add("delete");
+
+    modal.classList.add("show");
+
+    modalSubmitAction = async function() {
+        await deleteAction();
+    };
+}
+
+// MENU MANAGEMENT
+
+async function loadMenu() {
+    try {
+        const items = await getData("/api/menu");
+
+        document.getElementById("menuCount").textContent = items.length;
+
+        document.getElementById("menuTable").innerHTML = items.length
+            ? items.map(item => `
+                <tr>
+                    <td>${escapeHTML(item.MenuID)}</td>
+                    <td><strong>${escapeHTML(item.ItemName)}</strong></td>
+                    <td>${escapeHTML(item.Description)}</td>
+                    <td>${escapeHTML(item.Category)}</td>
+                    <td>₱${Number(item.Price).toLocaleString("en-PH")}</td>
+                    <td>${statusBadge(item.Availability)}</td>
+                    <td>
+                        <button class="action" data-action="edit-menu" data-id="${Number(item.MenuID)}">Edit</button>
+                        <button class="action delete" data-action="delete-menu" data-id="${Number(item.MenuID)}">Delete</button>
+                    </td>
+                </tr>
+            `).join("")
+            : `<tr><td colspan="7" class="empty">No menu items found.</td></tr>`;
+
+    } catch (error) {
+        showError("menuTable", 7, error);
+    }
+}
+
+function addMenu() {
+    openModal("Add Menu Item", `
+        ${field("Item Name", "itemName")}
+        ${textAreaField("Description", "description")}
+        ${field("Category", "category")}
+        ${field("Price (₱)", "price", "", "number")}
+    `, async function(data) {
+        await saveAdminData("/api/menu", "POST", {
+            itemName: data.get("itemName"),
+            description: data.get("description"),
+            category: data.get("category"),
+            price: Number(data.get("price"))
+        }, loadMenu);
+    });
+}
+
+async function editMenu(id) {
+    try {
+        const items = await getData("/api/menu");
+        const item = items.find(x => Number(x.MenuID) === id);
+
+        if (!item) {
+            alert("Menu item not found. It may be unavailable.");
+            return;
+        }
+
+        openModal("Edit Menu Item", `
+            ${field("Item Name", "itemName", item.ItemName)}
+            ${textAreaField("Description", "description", item.Description)}
+            ${field("Category", "category", item.Category)}
+            ${field("Price (₱)", "price", item.Price, "number")}
+            ${selectField("Availability", "availability", item.Availability, ["Available", "Unavailable"])}
+        `, async function(data) {
+            await saveAdminData(`/api/menu/${id}`, "PUT", {
+                itemName: data.get("itemName"),
+                description: data.get("description"),
+                category: data.get("category"),
+                price: Number(data.get("price")),
+                availability: data.get("availability")
+            }, loadMenu);
+        });
+
+    } catch (error) {
+        alert("Error: " + error.message);
+    }
+}
+
+function deleteMenu(id) {
+    showDeleteConfirmation("Are you sure you want to delete this menu item?", async function() {
+        await saveAdminData(`/api/menu/${id}`, "DELETE", null, loadMenu);
+    });
+}
+
+// EMPLOYEE MANAGEMENT
+
+async function loadEmployees() {
+    try {
+        const employees = await getData("/api/employees");
+
+        document.getElementById("employeeCount").textContent = employees.length;
+
+        document.getElementById("employeeTable").innerHTML = employees.length
+            ? employees.map(employee => `
+                <tr>
+                    <td>${escapeHTML(employee.EmployeeID)}</td>
+                    <td><strong>${escapeHTML(employee.EmployeeName)}</strong></td>
+                    <td>${escapeHTML(employee.Position)}</td>
+                    <td>${escapeHTML(employee.ContactNumber)}</td>
+                    <td>${escapeHTML(employee.Email)}</td>
+                    <td>${statusBadge(employee.Status)}</td>
+                    <td>
+                        <button class="action" data-action="edit-employee" data-id="${Number(employee.EmployeeID)}">Edit</button>
+                        <button class="action delete" data-action="delete-employee" data-id="${Number(employee.EmployeeID)}">Delete</button>
+                    </td>
+                </tr>
+            `).join("")
+            : `<tr><td colspan="7" class="empty">No employees found.</td></tr>`;
+
+    } catch (error) {
+        showError("employeeTable", 7, error);
+    }
+}
+
+function addEmployee() {
+    openModal("Add Employee", `
+        ${field("Employee Name", "employeeName")}
+        ${field("Position", "position")}
+        ${field("Contact Number", "contactNumber", "", "tel", false)}
+        ${field("Email Address", "email", "", "email", false)}
+    `, async function(data) {
+        await saveAdminData("/api/employees", "POST", {
+            employeeName: data.get("employeeName"),
+            position: data.get("position"),
+            contactNumber: data.get("contactNumber"),
+            email: data.get("email")
+        }, loadEmployees);
+    });
+}
+
+async function editEmployee(id) {
+    try {
+        const employees = await getData("/api/employees");
+        const employee = employees.find(x => Number(x.EmployeeID) === id);
+
+        if (!employee) {
+            alert("Employee not found. The employee may be inactive.");
+            return;
+        }
+
+        openModal("Edit Employee", `
+            ${field("Employee Name", "employeeName", employee.EmployeeName)}
+            ${field("Position", "position", employee.Position)}
+            ${field("Contact Number", "contactNumber", employee.ContactNumber || "", "tel", false)}
+            ${field("Email Address", "email", employee.Email || "", "email", false)}
+            ${selectField("Status", "status", employee.Status, ["Active", "Inactive"])}
+        `, async function(data) {
+            await saveAdminData(`/api/employees/${id}`, "PUT", {
+                employeeName: data.get("employeeName"),
+                position: data.get("position"),
+                contactNumber: data.get("contactNumber"),
+                email: data.get("email"),
+                status: data.get("status")
+            }, loadEmployees);
+        });
+
+    } catch (error) {
+        alert("Error: " + error.message);
+    }
+}
+
+function deleteEmployee(id) {
+    showDeleteConfirmation("Are you sure you want to delete this employee?", async function() {
+        await saveAdminData(`/api/employees/${id}`, "DELETE", null, loadEmployees);
+    });
+}
+
+// RESERVATIONS
+
+async function loadReservations() {
+    try {
+        const reservations = await getData("/api/reservations");
+
+        document.getElementById("reservationCount").textContent = reservations.length;
+
+        document.getElementById("reservationTable").innerHTML =
+            reservations.map(reservation => `
+                <tr>
+                    <td><strong>${escapeHTML(reservation.ReferenceNo)}</strong></td>
+                    <td>${escapeHTML(reservation.CustomerName)}</td>
+                    <td>${escapeHTML(reservation.GuestCount)}</td>
+                    <td>${escapeHTML(reservation.TableCode)}</td>
+                    <td>${formatDate(reservation.ReservationDate)}</td>
+                    <td>${formatTime(reservation.ReservationTime)}</td>
+                    <td>₱${Number(reservation.ReservationFee).toLocaleString("en-PH")}</td>
+                    <td>${escapeHTML(reservation.PaymentMethod)}</td>
+                    <td>
+                        ${statusBadge(reservation.Status)}
+                        <button class="action" data-action="change-status" data-id="${Number(reservation.ReservationID)}">Change</button>
+                    </td>
+                </tr>
+            `).join("") ||
+            `<tr><td colspan="9" class="empty">No reservations found.</td></tr>`;
+
+        document.getElementById("recentReservations").innerHTML =
+            reservations.slice(0, 5).map(reservation => `
+                <tr>
+                    <td>${escapeHTML(reservation.ReferenceNo)}</td>
+                    <td>${escapeHTML(reservation.CustomerName)}</td>
+                    <td>${escapeHTML(reservation.TableCode)}</td>
+                    <td>${formatDate(reservation.ReservationDate)}</td>
+                    <td>${statusBadge(reservation.Status)}</td>
+                </tr>
+            `).join("") ||
+            `<tr><td colspan="5" class="empty">No reservations found.</td></tr>`;
+
+    } catch (error) {
+        showError("reservationTable", 9, error);
+        showError("recentReservations", 5, error);
+    }
+}
+
+function changeReservationStatus(id) {
+    openModal("Change Reservation Status", `
+        ${selectField("Select Status", "status", "Pending", ["Pending", "Confirmed", "Cancelled"])}
+    `, async function(data) {
+        await saveAdminData(`/api/reservations/${id}/status`, "PATCH", {
+            status: data.get("status")
+        }, loadReservations);
+    });
+}
+
+// NAVIGATION AND BUTTON EVENTS
+
+function showSection(sectionId) {
+    document.querySelectorAll(".section").forEach(section => {
+        section.classList.remove("active");
+    });
+
+    document.querySelectorAll(".nav-btn").forEach(button => {
+        button.classList.toggle("active", button.dataset.section === sectionId);
+    });
+
+    const section = document.getElementById(sectionId);
+    if (!section) return;
+
+    section.classList.add("active");
+
+    const titles = {
+        dashboard: "Dashboard",
+        menu: "Menu Management",
+        employees: "Employee Management",
+        reservations: "Reservation Management"
+    };
+
+    document.getElementById("pageTitle").textContent = titles[sectionId];
+
+    if (sectionId === "menu") loadMenu();
+    if (sectionId === "employees") loadEmployees();
+    if (sectionId === "reservations") loadReservations();
+}
+
+document.addEventListener("click", function(event) {
+    const sectionButton = event.target.closest("[data-section]");
+
+    if (sectionButton) {
+        showSection(sectionButton.dataset.section);
+        return;
+    }
+
+    const button = event.target.closest("[data-action]");
+    if (!button) return;
+
+    const id = Number(button.dataset.id);
+
+    if (button.dataset.action === "edit-menu") editMenu(id);
+    if (button.dataset.action === "delete-menu") deleteMenu(id);
+    if (button.dataset.action === "edit-employee") editEmployee(id);
+    if (button.dataset.action === "delete-employee") deleteEmployee(id);
+    if (button.dataset.action === "change-status") changeReservationStatus(id);
+});
+
+document.getElementById("addMenuBtn").addEventListener("click", addMenu);
+document.getElementById("refreshMenuBtn").addEventListener("click", loadMenu);
+
+document.getElementById("addEmployeeBtn").addEventListener("click", addEmployee);
+document.getElementById("refreshEmployeeBtn").addEventListener("click", loadEmployees);
+
+document.getElementById("refreshReservationBtn").addEventListener("click", loadReservations);
+
+async function loadDashboard() {
+    await Promise.all([
+        loadMenu(),
+        loadEmployees(),
+        loadReservations()
+    ]);
+}
+
+loadDashboard();
+
+</script>
+
+</body>
+</html>
